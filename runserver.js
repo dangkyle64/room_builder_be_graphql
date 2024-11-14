@@ -1,18 +1,19 @@
 const express = require('express');
 const { ApolloServer } = require('apollo-server-express');
-const typeDefs = require('./schema');
-const { resolvers } = require('./resolvers');
-
+const roomTypeDefs = require('./src/postRoom/postRoomSchema');
+const postRoomResolvers = require('./src/postRoom/postRoomResolvers');
 const app = express();
 
 // initialize Apollo server
 const server = new ApolloServer({
-    typeDefs,
-    resolvers,
+    typeDefs: roomTypeDefs,
+    resolvers: postRoomResolvers,
+
+    // check for errors
     formatError: (error) => {
         console.error(error);
     },
-    
+
     introspection: true, // off in production
     playground: true, // off in production
 });
