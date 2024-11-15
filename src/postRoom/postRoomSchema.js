@@ -6,9 +6,9 @@ const roomTypeDefs = gql`
 
     type Room {
         id: ID! 
-        length: Int!
-        width: Int!
-        height: Int!
+        length: Float!
+        width: Float!
+        height: Float!
     }
 
     type Query {
@@ -17,8 +17,8 @@ const roomTypeDefs = gql`
     }
 
     type Mutation {
-        createPostRoom(id: Int!, length: Int!, width: Int!, height: Int!): Room 
-        updatePostRoom(id: Int!, length: Int!, width: Int!, height: Int!): Room 
+        createPostRoom(id: Int!, length: Float!, width: Float!, height: Float!): Room 
+        updatePostRoom(id: Int!, length: Float!, width: Float!, height: Float!): Room 
         deletePostRoom(id: Int!): Boolean
     }
 `;
