@@ -66,7 +66,7 @@ describe('createPostRoom mutation', () => {
     test('should create a room and return correct room data', async () => {
         const createRoomTestMutation = `
             mutation {
-                createPostRoom(id: 123, length: 5, width: 15, height: 25) {
+                createPostRoom(id: 123, length: 5.55, width: 15.99, height: 25.001) {
                     id
                     length
                     width
@@ -83,16 +83,16 @@ describe('createPostRoom mutation', () => {
 
             // check if mutation returns correct room data 
             assert.strictEqual(response.body.data.createPostRoom.id, '123');
-            assert.strictEqual(response.body.data.createPostRoom.length, 5);
-            assert.strictEqual(response.body.data.createPostRoom.width, 15);
-            assert.strictEqual(response.body.data.createPostRoom.height, 25);
+            assert.strictEqual(response.body.data.createPostRoom.length, 5.55);
+            assert.strictEqual(response.body.data.createPostRoom.width, 15.99);
+            assert.strictEqual(response.body.data.createPostRoom.height, 25.001);
 
             // check if service was called
             assert.strictEqual(postRoomService.createPostRoom.calledOnce, true);
 
     });
 
-    test('should throw error if dimensions are invalid', async () => {
+    test('should throw error if dimensions are negative', async () => {
         const createRoomInvalidMutation = `
             mutation {
                 createPostRoom(id: 123, length: -5, width: -15, height: -25) {
@@ -111,6 +111,69 @@ describe('createPostRoom mutation', () => {
             .expect(200); // graphQL always returns 200 OK even on errors, check error message
 
         assert.strictEqual(response.body.errors[0].message, 'Dimensions have to be greater than 0');
+    });
+
+    test('should throw error if dimensions are higher than maximum', async () => {
+        const createRoomInvalidMutation = `
+            mutation {
+                createPostRoom(id: 123, length: 105, width: 15.21, height: 25) {
+                    id
+                    length
+                    width
+                    height
+                }
+            }
+        `;
+
+        const response = await supertest(httpServer)
+            .post('/graphql')
+            .send({ query: createRoomInvalidMutation })
+            .expect('Content-Type', /json/)
+            .expect(200); // graphQL always returns 200 OK even on errors, check error message
+
+        assert.strictEqual(response.body.errors[0].message, 'Dimensions have to be less than 100');
+    });
+
+    test('should throw error if measurements is not an integer or float', async () => {
+        const createRoomInvalidMutation = `
+            mutation {
+                createPostRoom(id: 123, length: apple, width: 15.21, height: 25) {
+                    id
+                    length
+                    width
+                    height
+                }
+            }
+        `;
+
+        const response = await supertest(httpServer)
+            .post('/graphql')
+            .send({ query: createRoomInvalidMutation })
+            .expect('Content-Type', /json/)
+            .expect(400); // graphQL will return a 400 if it fails on the query
+
+        assert.strictEqual(response.body.errors[0].message, 'Float cannot represent non numeric value: apple');
+    });
+
+    test('should throw error if measurements has a null', async () => {
+        const createRoomInvalidMutation = `
+            mutation {
+                createPostRoom(id: 123, length: 12, width: 15.21) {
+                    id
+                    length
+                    width
+                    height
+                }
+            }
+        `;
+
+        const response = await supertest(httpServer)
+            .post('/graphql')
+            .send({ query: createRoomInvalidMutation })
+            .expect('Content-Type', /json/)
+            .expect(400); // graphQL will return a 400 if it fails on the query
+
+        assert.strictEqual(response.body.errors[0].message, 'Field "createPostRoom" argument "height" of type "Float!" is required, but it was not provided.');
     });
 
 });

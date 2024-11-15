@@ -87,7 +87,7 @@ describe('updatePostRoom mutation', () => {
             assert.strictEqual(postRoomService.updatePostRoom.calledOnce, true);
     });
 
-    test('should throw error if dimensions are invalid', async () => {
+    test('should throw error if update dimensions are negative', async () => {
         const updateRoomInvalidMutation = `
             mutation {
                 updatePostRoom(id: 123, length: -5, width: 12, height: 16) {
@@ -108,4 +108,67 @@ describe('updatePostRoom mutation', () => {
     assert.strictEqual(response.body.errors[0].message, 'Dimensions used in the updated have to be greater than 0');
     
     })
+
+    test('should throw error if update dimensions are higher than maximum', async () => {
+        const updateRoomInvalidMutation = `
+            mutation {
+                updatePostRoom(id: 123, length: 105, width: 15.21, height: 25) {
+                    id
+                    length
+                    width
+                    height
+                }
+            }
+        `;
+
+        const response = await supertest(httpServer)
+            .post('/graphql')
+            .send({ query: updateRoomInvalidMutation })
+            .expect('Content-Type', /json/)
+            .expect(200); // graphQL always returns 200 OK even on errors, check error message
+
+        assert.strictEqual(response.body.errors[0].message, 'Update dimensions have to be less than 100');
+    });
+
+    test('should throw error if update measurements are not integer or float', async () => {
+        const updateRoomInvalidMutation = `
+            mutation {
+                updatePostRoom(id: 123, length: banana, width: 15.21, height: 25) {
+                    id
+                    length
+                    width
+                    height
+                }
+            }
+        `;
+
+        const response = await supertest(httpServer)
+            .post('/graphql')
+            .send({ query: updateRoomInvalidMutation })
+            .expect('Content-Type', /json/)
+            .expect(400); // graphQL will return 400 if query is invalid
+
+        assert.strictEqual(response.body.errors[0].message, 'Float cannot represent non numeric value: banana');
+    });
+
+    test('should throw error if update measurements are null', async () => {
+        const updateRoomInvalidMutation = `
+            mutation {
+                updatePostRoom(id: 123, length: 12.23, height: 25) {
+                    id
+                    length
+                    width
+                    height
+                }
+            }
+        `;
+
+        const response = await supertest(httpServer)
+            .post('/graphql')
+            .send({ query: updateRoomInvalidMutation })
+            .expect('Content-Type', /json/)
+            .expect(400); // graphQL will return 400 if query is invalid
+
+        assert.strictEqual(response.body.errors[0].message, 'Field "updatePostRoom" argument "width" of type "Float!" is required, but it was not provided.');
+    });
 });
