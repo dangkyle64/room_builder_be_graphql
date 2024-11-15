@@ -18,7 +18,7 @@ class RoomService {
         return { id, length, width, height };
     }
 
-    static async updatePostRoom (id, { length, width, height }) {
+    static async updatePostRoom ({ id, length, width, height }) {
         return { id, length, width, height };
     }
 
