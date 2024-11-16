@@ -10,13 +10,13 @@ module.exports = {
 
             // check if negative values for measurements
             if (length <= lengthMin || width <= lengthMin || height <= lengthMin) {
-                console.log('Invalid dimensions:', length, width, height); 
+                //console.log('Invalid dimensions:', length, width, height); 
                 throw new UserInputError('Dimensions have to be greater than 0');
             }
 
             // check if values are beyond current maximum
             if (length >= lengthMax || width >= lengthMax || height >= lengthMax) {
-                console.log('Invalid dimensions:', length, width, height); 
+                //console.log('Invalid dimensions:', length, width, height); 
                 throw new UserInputError('Dimensions have to be less than 100');
             }
 

@@ -59,6 +59,7 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
+    sinon.restore();
     httpServer.close();
 });
 
