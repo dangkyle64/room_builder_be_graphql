@@ -25,6 +25,7 @@ const typeDefs = gql`
         width: Float!
         height: Float!
     }
+
     type Query {
         _empty: String
     }
@@ -55,7 +56,7 @@ beforeEach(async () => {
     await testServer.start()
     testServer.applyMiddleware({ app });
 
-    httpServer = app.listen(5000, () => console.log('Server running on http://localhost:5000/graphql'))
+    httpServer = app.listen(5000, () => console.log('Server running on http://localhost:5000/graphql'));
 });
 
 afterEach(async () => {
