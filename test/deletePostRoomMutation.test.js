@@ -5,8 +5,8 @@ const supertest = require('supertest');
 const { ApolloServer, gql } = require('apollo-server-express');
 const sinon = require('sinon');
 
-const deletePostRoomMutation = require('../src/postRoom/postMutations/deletePostRoom');
-const postRoomService = require('../src/postRoom/postRoomServices');
+const deletePostRoomResolver = require('../src/postRoom/postMutations/deletePostRoom');
+const postRoomServices = require('../src/postRoom/postRoomServices');
 
 const typeDefs = gql`
     type Room {
@@ -24,7 +24,7 @@ const typeDefs = gql`
     }
 `;
 
-const resolvers = deletePostRoomMutation;
+const resolvers = deletePostRoomResolver;
 
 let app;
 let testServer;
@@ -45,10 +45,10 @@ beforeEach(async () => {
     await testServer.start()
     testServer.applyMiddleware({ app });
 
-    httpServer = app.listen(7000, () => console.log('Server running on http://localhost:7000/graphql'));
+    httpServer = app.listen(4005, () => console.log('Server running on http://localhost:4005/graphql'));
 
     // Create a room before each test
-    createdRoom = await postRoomService.createPostRoom({
+    createdRoom = await postRoomServices.createPostRoom({
         id: '123',
         length: 10,
         width: 15,
@@ -64,7 +64,7 @@ afterEach(async () => {
 
 describe('deletePostRoom mutation', () => {
     test('should delete a room and return success message', async () => {
-        const deletePostRoomTestMutation = `
+        const deletePostRoomValidMutation = `
             mutation {
                 deletePostRoom(id: 123)
             }
@@ -72,7 +72,7 @@ describe('deletePostRoom mutation', () => {
 
     const response = await supertest(httpServer)
         .post('/graphql')
-        .send({ query: deletePostRoomTestMutation })
+        .send({ query: deletePostRoomValidMutation })
         .expect('Content-Type', /json/)
         .expect(200)
 
@@ -84,9 +84,9 @@ describe('deletePostRoom mutation', () => {
     test('should return an error because room does not exist', async () => {
 
         // mock missing room
-        const getRoomByIdStub = sinon.stub(postRoomService, 'getRoomById').resolves(null);
+        const getRoomByIdStub = sinon.stub(postRoomServices, 'getRoomById').resolves(null);
 
-        const deletePostRoomTestMutation = `
+        const deletePostRoomInvalidMutation = `
             mutation {
                 deletePostRoom(id: 321)
             }
@@ -94,7 +94,7 @@ describe('deletePostRoom mutation', () => {
 
     const response = await supertest(httpServer)
         .post('/graphql')
-        .send({ query: deletePostRoomTestMutation })
+        .send({ query: deletePostRoomInvalidMutation })
         .expect('Content-Type', /json/)
         .expect(200)
 
@@ -102,7 +102,7 @@ describe('deletePostRoom mutation', () => {
             //console.log("Response Body for delete", response.body);
             assert.strictEqual(response.body.data.deletePostRoom, null);
 
-            // restore stub 
-            getRoomByIdStub.restore();
+            assert.strictEqual(getRoomByIdStub.calledOnce, true);
+
     });
 });

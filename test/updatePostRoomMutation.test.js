@@ -5,11 +5,11 @@ const supertest = require('supertest');
 const { ApolloServer, gql } = require('apollo-server-express');
 const sinon = require('sinon');
 
-const updateRoomMutation = require('../src/postRoom/postMutations/updatePostRoom');
-const postRoomService = require('../src/postRoom/postRoomServices');
+const updateRoomResolver = require('../src/postRoom/postMutations/updatePostRoom');
+const postRoomServices = require('../src/postRoom/postRoomServices');
 
 // mock room injection
-sinon.stub(postRoomService, 'updatePostRoom').callsFake(async (args) => {
+sinon.stub(postRoomServices, 'updatePostRoom').callsFake(async (args) => {
     return {
         id: args.id,
         length: args.length,
@@ -34,7 +34,7 @@ const typeDefs = gql`
     }
 `;
 
-const resolvers = updateRoomMutation;
+const resolvers = updateRoomResolver;
 
 let app;
 let testServer;
@@ -50,7 +50,7 @@ beforeEach(async () => {
     await testServer.start()
     testServer.applyMiddleware({ app });
 
-    httpServer = app.listen(6000, () => console.log('Server running on http://localhost:6000/graphql'));
+    httpServer = app.listen(4004, () => console.log('Server running on http://localhost:4004/graphql'));
 });
 
 afterEach(async () => {
@@ -60,7 +60,7 @@ afterEach(async () => {
 
 describe('updatePostRoom mutation', () => {
     test('should update a room and return correct room data', async () => {
-        const updateRoomTestMutation = `
+        const updateRoomValidMutation = `
             mutation {
                 updatePostRoom(id: 123, length: 2, width: 12, height: 75) {
                     id
@@ -73,11 +73,11 @@ describe('updatePostRoom mutation', () => {
 
     const response = await supertest(httpServer)
         .post('/graphql')
-        .send({ query: updateRoomTestMutation })
+        .send({ query: updateRoomValidMutation })
         .expect('Content-Type', /json/)
         .expect(200)
 
-            console.log("responseeeeeee: ", response.body);
+            //console.log("responseeeeeee: ", response.body);
             // check if mutation returns correct room data 
             assert.strictEqual(response.body.data.updatePostRoom.id, '123');
             assert.strictEqual(response.body.data.updatePostRoom.length, 2);
@@ -85,7 +85,7 @@ describe('updatePostRoom mutation', () => {
             assert.strictEqual(response.body.data.updatePostRoom.height, 75);
 
             // check if service was called
-            assert.strictEqual(postRoomService.updatePostRoom.calledOnce, true);
+            assert.strictEqual(postRoomServices.updatePostRoom.calledOnce, true);
     });
 
     test('should throw error if update dimensions are negative', async () => {

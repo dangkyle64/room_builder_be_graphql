@@ -2,7 +2,7 @@ const RoomService = require('../postRoomServices');
 
 module.exports = {
     Query: {
-        getPostRooms: async () => {
+        getPostAllRooms: async () => {
             return await RoomService.getAllRooms();
         },
     },

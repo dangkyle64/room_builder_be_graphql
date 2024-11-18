@@ -1,12 +1,12 @@
 const createRoom = require('./postMutations/createPostRoom');
 const updateRoom = require('./postMutations/updatePostRoom');
 const deleteRoom = require('./postMutations/deletePostRoom');
-const getAllRooms = require('./postQueries/getPostRooms');
 const getRoomById = require('./postQueries/getPostRoom');
+const getPostAllRooms = require('./postQueries/getPostAllRooms');
 
 module.exports = {
     Query: {
-        getPostRooms: getAllRooms.Query.getPostRooms,
+        getPostAllRooms: getPostAllRooms.Query.getPostAllRooms,
         getPostRoom: getRoomById.Query.getPostRoom,
     },
 

@@ -5,7 +5,7 @@ const supertest = require('supertest');
 const { ApolloServer, gql } = require('apollo-server-express');
 const sinon = require('sinon');
 
-const getPostRoomQuery = require('../src/postRoom/postQueries/getPostRoom');
+const getPostRoomResolver = require('../src/postRoom/postQueries/getPostRoom');
 const postRoomService = require('../src/postRoom/postRoomServices');
 
 const typeDefs = gql`
@@ -25,7 +25,7 @@ const typeDefs = gql`
     }
 `;
 
-const resolvers = getPostRoomQuery;
+const resolvers = getPostRoomResolver;
 
 let app;
 let testServer;
@@ -41,7 +41,7 @@ beforeEach(async () => {
     await testServer.start();
     testServer.applyMiddleware({ app });
 
-    httpServer = app.listen(9000, () => console.log('Server running on http://localhost:9000/graphql'));
+    httpServer = app.listen(4002, () => console.log('Server running on http://localhost:4002/graphql'));
 
     // Create a room before each test
     createdRoom = await postRoomService.createPostRoom({

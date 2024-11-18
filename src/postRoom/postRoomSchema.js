@@ -13,7 +13,7 @@ const roomTypeDefs = gql`
 
     type Query {
         getPostRoom(id: ID!): Room 
-        getPostRooms: [Room]
+        getPostAllRooms: [Room]
     }
 
     type Mutation {

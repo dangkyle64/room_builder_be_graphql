@@ -5,11 +5,11 @@ const supertest = require('supertest');
 const { ApolloServer, gql } = require('apollo-server-express');
 const sinon  = require('sinon');
 
-const createRoomMutation = require('../src/postRoom/postMutations/createPostRoom');
-const postRoomService = require('../src/postRoom/postRoomServices');
+const createRoomResolver = require('../src/postRoom/postMutations/createPostRoom');
+const postRoomServices = require('../src/postRoom/postRoomServices');
 
 // mock room injection
-sinon.stub(postRoomService, 'createPostRoom').callsFake(async (args) => {
+sinon.stub(postRoomServices, 'createPostRoom').callsFake(async (args) => {
     return {
         id: args.id,
         length: args.length,
@@ -35,8 +35,7 @@ const typeDefs = gql`
     }
 `;
 
-const resolvers = createRoomMutation;
-
+const resolvers = createRoomResolver;
 
 let app;
 let testServer;
@@ -56,7 +55,7 @@ beforeEach(async () => {
     await testServer.start()
     testServer.applyMiddleware({ app });
 
-    httpServer = app.listen(5000, () => console.log('Server running on http://localhost:5000/graphql'));
+    httpServer = app.listen(4003, () => console.log('Server running on http://localhost:4003/graphql'));
 });
 
 afterEach(async () => {
@@ -66,7 +65,7 @@ afterEach(async () => {
 
 describe('createPostRoom mutation', () => {
     test('should create a room and return correct room data', async () => {
-        const createRoomTestMutation = `
+        const createRoomValidMutation = `
             mutation {
                 createPostRoom(id: 123, length: 5.55, width: 15.99, height: 25.001) {
                     id
@@ -79,7 +78,7 @@ describe('createPostRoom mutation', () => {
 
     const response = await supertest(httpServer)
         .post('/graphql')
-        .send({ query: createRoomTestMutation })
+        .send({ query: createRoomValidMutation })
         .expect('Content-Type', /json/)
         .expect(200)
 
@@ -90,7 +89,7 @@ describe('createPostRoom mutation', () => {
             assert.strictEqual(response.body.data.createPostRoom.height, 25.001);
 
             // check if service was called
-            assert.strictEqual(postRoomService.createPostRoom.calledOnce, true);
+            assert.strictEqual(postRoomServices.createPostRoom.calledOnce, true);
 
     });
 
