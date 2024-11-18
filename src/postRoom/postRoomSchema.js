@@ -1,7 +1,5 @@
 const { gql } = require('apollo-server-express');
 
-// defining post schema
-
 const roomTypeDefs = gql`
 
     type Room {
