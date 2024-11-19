@@ -6,9 +6,9 @@ const { gql } = require('apollo-server-express');
 const furnitureTypeDefs = gql`
     type Furniture {
         id: ID!
-        position_x: Float!
-        position_y: Float!
-        position_z: Float!
+        position_x: Float = 0
+        position_y: Float = 0
+        position_z: Float = 0
         length: Float!
         width: Float!
         height: Float!

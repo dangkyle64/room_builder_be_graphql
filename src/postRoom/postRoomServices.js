@@ -3,14 +3,14 @@ class RoomService {
 
     static async getRoomById(id) {
         console.log("The id is: ", id);
-        const room = { id: id, length: 10, width: 12, height: 20};
+        const room = { id: id, length: 10, width: 12, height: 20 };
         return room;
     }
 
     static async getAllRooms() {
         return [
-            { id: 1, length: 10, width: 12, height: 20},
-            { id: 2, length: 14, width: 2, height: 230}
+            { id: 1, length: 10, width: 12, height: 20 },
+            { id: 2, length: 14, width: 2, height: 30 }
         ];
     }
 
