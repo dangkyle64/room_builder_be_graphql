@@ -36,10 +36,6 @@ beforeEach(async () => {
     testServer = new ApolloServer({ 
         typeDefs, 
         resolvers,
-        formatError: (error) => {
-            console.log("Error: ", error);
-            return error;
-        },
     });
 
     await testServer.start()
@@ -58,10 +54,17 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-    sinon.restore();
-    httpServer.close();
-});
+    //console.log("Shutting down server");
 
+    //remove stub
+    sinon.restore();
+
+    //confirm server shuts down
+    if (httpServer) {
+        await new Promise(resolve => httpServer.close(resolve));
+        //console.log('Server shut down');
+    }
+});
 describe('deletePostRoom mutation', () => {
     test('should delete a room and return success message', async () => {
         const deletePostRoomValidMutation = `

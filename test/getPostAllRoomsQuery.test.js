@@ -36,10 +36,6 @@ beforeEach(async () => {
     testServer = new ApolloServer({
         typeDefs, 
         resolvers,
-        formatError: (error) => {
-            console.log("Error: ", error);
-            return error;
-        },
     });
 
     await testServer.start();
@@ -48,9 +44,17 @@ beforeEach(async () => {
     httpServer = app.listen(4001, () => console.log('Server running on http://localhost:4001/graphql'));
 });
 
-afterEach (async () => {
+afterEach(async () => {
+    //console.log("Shutting down server");
+
+    //remove stub
     sinon.restore();
-    httpServer.close();
+
+    //confirm server shuts down
+    if (httpServer) {
+        await new Promise(resolve => httpServer.close(resolve));
+        //console.log('Server shut down');
+    }
 });
 
 describe('Get all rooms query', () => {
@@ -89,7 +93,7 @@ describe('Get all rooms query', () => {
             .expect('Content-Type', /json/)
             .expect(200)
 
-            console.log("The response body of getPostAllRooms: ", JSON.stringify(response.body))
+            //console.log("The response body of getPostAllRooms: ", JSON.stringify(response.body))
             assert.strictEqual(response.body.data.getPostAllRooms.length, 2);
 
             const room1 = response.body.data.getPostAllRooms[0];

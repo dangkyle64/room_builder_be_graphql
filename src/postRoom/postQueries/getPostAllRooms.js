@@ -1,9 +1,9 @@
-const RoomService = require('../postRoomServices');
+const RoomServices = require('../postRoomServices');
 
 module.exports = {
     Query: {
         getPostAllRooms: async () => {
-            return await RoomService.getAllRooms();
+            return await RoomServices.getAllRooms();
         },
     },
 };

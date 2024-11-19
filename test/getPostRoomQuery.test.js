@@ -53,7 +53,13 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-    httpServer.close();
+    //console.log("Shutting down server");
+
+    //confirm server shuts down
+    if (httpServer) {
+        await new Promise(resolve => httpServer.close(resolve));
+        //console.log('Server shut down');
+    }
 });
 
 describe('Query Room by ID', () => {

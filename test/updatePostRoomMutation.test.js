@@ -54,8 +54,16 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
+    //console.log("Shutting down server");
+
+    //remove stub
     sinon.restore();
-    httpServer.close();
+
+    //confirm server shuts down
+    if (httpServer) {
+        await new Promise(resolve => httpServer.close(resolve));
+        //console.log('Server shut down');
+    }
 });
 
 describe('updatePostRoom mutation', () => {

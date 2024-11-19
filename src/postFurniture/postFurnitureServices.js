@@ -1,4 +1,4 @@
-class FurnitureService {
+class FurnitureServices {
 
     static roomDummy = {id: 1, length: 10.2, width: 42.2, height: 43};
 
@@ -26,3 +26,5 @@ class FurnitureService {
         return true; //assuming it deleted properly
     }
 }
+
+module.exports = FurnitureServices;
