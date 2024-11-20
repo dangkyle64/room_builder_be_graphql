@@ -6,7 +6,7 @@ const { ApolloServer, gql } = require('apollo-server-express');
 const sinon = require('sinon');
 
 const getPostRoomResolver = require('../src/postRoom/postQueries/getPostRoom');
-const postRoomService = require('../src/postRoom/postRoomServices');
+const postRoomServices = require('../src/postRoom/postRoomServices');
 
 const typeDefs = gql`
     type Room {
@@ -42,18 +42,13 @@ beforeEach(async () => {
     testServer.applyMiddleware({ app });
 
     httpServer = app.listen(4002, () => console.log('Server running on http://localhost:4002/graphql'));
-
-    // Create a room before each test
-    createdRoom = await postRoomService.createPostRoom({
-        id: 123,
-        length: 10.12,
-        width: 15.65,
-        height: 5.1243,
-    });
 });
 
 afterEach(async () => {
     //console.log("Shutting down server");
+
+    //remove stub
+    sinon.restore();
 
     //confirm server shuts down
     if (httpServer) {
@@ -64,7 +59,17 @@ afterEach(async () => {
 
 describe('Query Room by ID', () => {
     test('should send back correct room data when given ID input', async () => {
-        const getRoomByIdTest =`
+
+        sinon.stub(postRoomServices, 'getRoomById').callsFake(async () => {
+            return {
+                id: 123,
+                length: 52.23,
+                width: 10.23,
+                height: 43.2,
+            };
+        });
+
+        const getRoomByIdalidQuery =`
             query {
                 getPostRoom(id: 123) {
                     id 
@@ -77,19 +82,22 @@ describe('Query Room by ID', () => {
 
     const response = await supertest(httpServer)
         .post('/graphql')
-        .send({ query: getRoomByIdTest })
+        .send({ query: getRoomByIdalidQuery })
         .expect('Content-Type', /json/)
         .expect(200)
 
         assert.strictEqual(response.body.data.getPostRoom.id, '123');
+        assert.strictEqual(response.body.data.getPostRoom.length, 52.23);
+        assert.strictEqual(response.body.data.getPostRoom.width, 10.23);
+        assert.strictEqual(response.body.data.getPostRoom.height, 43.2);
     })
 
     test('should return an error because room does not exist', async () => {
 
         // mock missing room
-        const getRoomByIdStub = sinon.stub(postRoomService, 'getRoomById').resolves(null);
+        sinon.stub(postRoomServices, 'getRoomById').resolves(null);
 
-        const getRoomByIdInvalidTest = `
+        const getRoomByIdInvalidQuery = `
             query {
                 getPostRoom(id: 321) {
                     id
@@ -102,14 +110,12 @@ describe('Query Room by ID', () => {
 
         const response = await supertest(httpServer)
             .post('/graphql')
-            .send({ query: getRoomByIdInvalidTest })
+            .send({ query: getRoomByIdInvalidQuery })
             .expect('Content-Type', /json/)
             .expect(200)
 
-            console.log("Errors:", response.body.errors);
+            //console.log("Errors:", response.body.errors);
             assert.strictEqual(response.body.errors[0].message, 'Room with id: 321 does not exist.');
 
-            // restore stub 
-            getRoomByIdStub.restore();
     });
 });

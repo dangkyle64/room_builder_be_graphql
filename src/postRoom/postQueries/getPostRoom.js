@@ -1,9 +1,9 @@
-const RoomService = require('../postRoomServices');
+const RoomServices = require('../postRoomServices');
 
 module.exports = {
     Query: {
         getPostRoom: async (_, { id }) => {
-            const room = await RoomService.getRoomById(id);
+            const room = await RoomServices.getRoomById(id);
 
             if (!room) {
                 throw new Error(`Room with id: ${id} does not exist.`)
