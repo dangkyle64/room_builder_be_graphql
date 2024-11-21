@@ -1,29 +1,30 @@
-const assert = require('assert');
+assert = require('assert');
 const express = require('express');
 const { describe, test, beforeEach, afterEach } = require('node:test');
 const supertest = require('supertest');
 const { ApolloServer, gql } = require('apollo-server-express');
 const sinon = require('sinon');
 
-const createRoomResolver = require('../src/postRoom/postMutations/createPostRoom');
-const postRoomServices = require('../src/postRoom/postRoomServices');
+const createFurnitureResolver = require('../src/postFurniture/postMutations/createPostFurniture');
+const postFurnitureServices = require('../src/postFurniture/postFurnitureServices');
 
-// mock room injection
-sinon.stub(postRoomServices, 'createPostRoom').callsFake(async (args) => {
+sinon.stub(postFurnitureServices, 'createPostFurniture').callsFake(async (args) => {
     return {
         id: args.id,
         length: args.length,
         width: args.width,
-        height: args.height
+        height: args.height,
+        roomId: args.roomId,
     }
 });
 
 const typeDefs = gql`
-    type Room {
+    type Furniture {
         id: ID!
         length: Float!
         width: Float!
         height: Float!
+        roomId: ID! 
     }
 
     type Query {
@@ -31,11 +32,11 @@ const typeDefs = gql`
     }
 
     type Mutation {
-        createPostRoom(id: ID!, length: Float!, width: Float!, height: Float!): Room!
+        createPostFurniture(id: ID!, length: Float!, width: Float!, height: Float!, roomId: ID!): Furniture!
     }
 `;
 
-const resolvers = createRoomResolver;
+const resolvers = createFurnitureResolver;
 
 let app;
 let testServer;
@@ -43,15 +44,15 @@ let httpServer;
 
 beforeEach(async () => {
     app = express();
-    testServer = new ApolloServer({ 
-        typeDefs, 
-        resolvers,
+    testServer = new ApolloServer({
+        typeDefs,
+        resolvers
     });
 
-    await testServer.start()
+    await testServer.start();
     testServer.applyMiddleware({ app });
 
-    httpServer = app.listen(4003, () => console.log('Server running on http://localhost:4003/graphql'));
+    httpServer = app.listen(4009, () => console.log('Server running on http://localhost:4009/graphql'));
 });
 
 afterEach(async () => {
@@ -67,82 +68,86 @@ afterEach(async () => {
     }
 });
 
-describe('createPostRoom mutation', () => {
-    test('should create a room and return correct room data', async () => {
-        const createRoomValidMutation = `
+describe('createPostFurniture mutation', () => {
+    test('it should create a furniture and return correct furniture data', async () => {
+        const createFurnitureValidMutation = `
             mutation {
-                createPostRoom(id: 123, length: 5.55, width: 15.99, height: 25.001) {
+                createPostFurniture(id: 123, length: 2.55, width: 3.99, height: 2.001, roomId: 1) {
                     id
                     length
                     width
                     height
+                    roomId
                 }
             }
         `;
 
     const response = await supertest(httpServer)
         .post('/graphql')
-        .send({ query: createRoomValidMutation })
+        .send({ query: createFurnitureValidMutation })
         .expect('Content-Type', /json/)
         .expect(200)
 
-            // check if mutation returns correct room data 
-            assert.strictEqual(response.body.data.createPostRoom.id, '123');
-            assert.strictEqual(response.body.data.createPostRoom.length, 5.55);
-            assert.strictEqual(response.body.data.createPostRoom.width, 15.99);
-            assert.strictEqual(response.body.data.createPostRoom.height, 25.001);
+        // check if mutation returns correct furniture data 
+            console.log('response body for createPostFurniture: ', response.body);
+            assert.strictEqual(response.body.data.createPostFurniture.id, '123');
+            assert.strictEqual(response.body.data.createPostFurniture.length, 2.55);
+            assert.strictEqual(response.body.data.createPostFurniture.width, 3.99);
+            assert.strictEqual(response.body.data.createPostFurniture.height, 2.001);
+            assert.strictEqual(response.body.data.createPostFurniture.roomId, '1');
 
             // check if service was called
-            assert.strictEqual(postRoomServices.createPostRoom.calledOnce, true);
-
+            assert.strictEqual(postFurnitureServices.createPostFurniture.calledOnce, true);
     });
 
     test('should throw error if dimensions are negative', async () => {
-        const createRoomInvalidMutation = `
+        const createFurnitureInvalidMutation = `
             mutation {
-                createPostRoom(id: 123, length: -5, width: -15, height: -25) {
+                createPostFurniture(id: 123, length: -5, width: -1, height: -2, roomId: 1) {
                     id
                     length
                     width
                     height
+                    roomId
                 }
             }
         `;
 
         const response = await supertest(httpServer)
             .post('/graphql')
-            .send({ query: createRoomInvalidMutation })
+            .send({ query: createFurnitureInvalidMutation })
             .expect('Content-Type', /json/)
             .expect(200); // graphQL always returns 200 OK even on errors, check error message
 
-        assert.strictEqual(response.body.errors[0].message, 'Dimensions for the room have to be greater than 0');
+        assert.strictEqual(response.body.errors[0].message, 'Dimensions for the furniture have to be greater than 0');
     });
 
     test('should throw error if dimensions are higher than maximum', async () => {
-        const createRoomInvalidMutation = `
+        const createFurnitureInvalidMutation = `
             mutation {
-                createPostRoom(id: 123, length: 105, width: 15.21, height: 25) {
+                createPostFurniture(id: 123, length: 22.55, width: 32.99, height: 22.001, roomId: 1) {
                     id
                     length
                     width
                     height
+                    roomId
                 }
             }
         `;
 
         const response = await supertest(httpServer)
             .post('/graphql')
-            .send({ query: createRoomInvalidMutation })
+            .send({ query: createFurnitureInvalidMutation })
             .expect('Content-Type', /json/)
-            .expect(200); // graphQL always returns 200 OK even on errors, check error message
+            .expect(200)
 
-        assert.strictEqual(response.body.errors[0].message, 'Dimensions for the room have to be less than 100');
+        assert.strictEqual(response.body.errors[0].message, 'Dimensions for the furniture have to be less than 5')
     });
 
     test('should throw error if measurements is not an integer or float', async () => {
-        const createRoomInvalidMutation = `
+        const createFurnitureInvalidMutation = `
             mutation {
-                createPostRoom(id: 123, length: apple, width: 15.21, height: 25) {
+                createPostFurniture(id: 123, length: apple, width: 1, height: 2, roomId: 1) {
                     id
                     length
                     width
@@ -153,7 +158,7 @@ describe('createPostRoom mutation', () => {
 
         const response = await supertest(httpServer)
             .post('/graphql')
-            .send({ query: createRoomInvalidMutation })
+            .send({ query: createFurnitureInvalidMutation })
             .expect('Content-Type', /json/)
             .expect(400); // graphQL will return a 400 if it fails on the query
 
@@ -161,9 +166,9 @@ describe('createPostRoom mutation', () => {
     });
 
     test('should throw error if measurements has a null', async () => {
-        const createRoomInvalidMutation = `
+        const createFurnitureInvalidMutation = `
             mutation {
-                createPostRoom(id: 123, length: 12, width: 15.21) {
+                createPostFurniture(id: 123, length: 2, width: 5.21, roomId: 1) {
                     id
                     length
                     width
@@ -174,11 +179,11 @@ describe('createPostRoom mutation', () => {
 
         const response = await supertest(httpServer)
             .post('/graphql')
-            .send({ query: createRoomInvalidMutation })
+            .send({ query: createFurnitureInvalidMutation })
             .expect('Content-Type', /json/)
             .expect(400); // graphQL will return a 400 if it fails on the query
 
-        assert.strictEqual(response.body.errors[0].message, 'Field "createPostRoom" argument "height" of type "Float!" is required, but it was not provided.');
+        assert.strictEqual(response.body.errors[0].message, 'Field "createPostFurniture" argument "height" of type "Float!" is required, but it was not provided.');
     });
 
 });
