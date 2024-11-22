@@ -22,7 +22,7 @@ class FurnitureServices {
         return { id, length, width, height, roomId };
     }
 
-    static async deletePostRoom(id, roomId) {
+    static async deletePostFurniture(id, roomId) {
         return true; //assuming it deleted properly
     }
 }

@@ -1,4 +1,4 @@
-const roomService = require('../postRoomServices');
+const roomServices = require('../postRoomServices');
 
 module.exports = {
     Mutation: {
@@ -6,13 +6,13 @@ module.exports = {
             converted_room_id = parseInt(id);
 
             // search for room in database
-            const room = await  roomService.getRoomById(converted_room_id);
+            const room = await  roomServices.getRoomById(converted_room_id);
 
             if(!room) {
                 throw new Error('Room not found');
             }
             
-            return await(roomService.deletePostRoom(converted_room_id));
+            return await(roomServices.deletePostRoom(converted_room_id));
         }
     }
 };
