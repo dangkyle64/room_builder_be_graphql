@@ -26,15 +26,14 @@ const furnitureTypeDefs = gql`
             id: Int!, 
             position_x: Float = 0, position_y: Float = 0, position_z: Float = 0, 
             length: Float!, width: Float!, height: Float!,
-            roomId: ID!,
+            roomId: ID!
         ) : Furniture 
 
         updatePostFurniture(
-            id: Int!, 
+            id: ID!, 
             position_x: Float!, position_y: Float!, position_z: Float!, 
             length: Float!, width: Float!, height: Float!,
-            roomId: ID!,
-            room: Room!,   
+            roomId: ID!   
         ) : Furniture
 
         deletePostFurniture(id: Int!): Boolean

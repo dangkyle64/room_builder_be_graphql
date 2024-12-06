@@ -18,8 +18,8 @@ class FurnitureServices {
         return { id, length, width, height, roomId };
     }
 
-    static async updatePostFurniture({ id, length, width, height, roomId }) {
-        return { id, length, width, height, roomId };
+    static async updatePostFurniture({ id, position_x, position_y, position_z, length, width, height, roomId }) {
+        return { id, position_x, position_y, position_z, length, width, height, roomId };
     }
 
     static async deletePostFurniture(id, roomId) {

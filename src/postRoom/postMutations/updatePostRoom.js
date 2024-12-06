@@ -17,7 +17,7 @@ module.exports = {
             // check if values are beyond current maximum
             if (length >= lengthMax || width >= lengthMax || height >= lengthMax) {
                 //console.log('Invalid dimensions:', length, width, height); 
-                throw new UserInputError('Update dimensions have to be less than 100');
+                throw new UserInputError('Update dimensions for room have to be less than 100');
             }
 
             return await RoomService.updatePostRoom({ id, length, width, height });

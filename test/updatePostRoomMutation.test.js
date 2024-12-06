@@ -136,7 +136,7 @@ describe('updatePostRoom mutation', () => {
             .expect('Content-Type', /json/)
             .expect(200); // graphQL always returns 200 OK even on errors, check error message
 
-        assert.strictEqual(response.body.errors[0].message, 'Update dimensions have to be less than 100');
+        assert.strictEqual(response.body.errors[0].message, 'Update dimensions for room have to be less than 100');
     });
 
     test('should throw error if update measurements are not integer or float', async () => {

@@ -6,7 +6,7 @@ const lengthMax = 100;
 
 module.exports = {
     Mutation: {
-        updatePostFurniture: async (_, { id, position_x, position_y, position_z, length, width, height }) => {
+        updatePostFurniture: async (_, { id, position_x, position_y, position_z, length, width, height, roomId }) => {
 
             // check if negative values for measurements
             if (length <= lengthMin || width <= lengthMin || height <= lengthMin) {
@@ -17,10 +17,10 @@ module.exports = {
             // check if values are beyond current maximum
             if (length >= lengthMax || width >= lengthMax || height >= lengthMax) {
                 //console.log('Invalid dimensions:', length, width, height); 
-                throw new UserInputError('Update dimensions have to be less than 100');
+                throw new UserInputError('Update dimensions for furniture have to be less than 100');
             }
 
-            return await furnitureServices.updatePostFurniture({ id, length, width, height });
+            return await furnitureServices.updatePostFurniture({ id, position_x, position_y, position_z, length, width, height, roomId });
         }
     }
 };
